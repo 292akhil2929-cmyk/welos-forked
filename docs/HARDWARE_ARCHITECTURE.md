@@ -2,17 +2,17 @@
 
 WELOS is a modular appliance that combines a photovoltaic rain-catching canopy, measured-site urban wind, protected battery storage and monitored rainwater treatment. A local edge controller runs the WELOS OS and continues safe operation without the cloud.
 
-The browser model at `/model.html` depicts a single rooftop unit: a shared panel and rain-catching canopy above the water, power and control bays, with a VAWT on the same platform. A soiling reference cell and valved cleaning rail show how maintenance is triggered and carried out. Its interactive separation view reveals 27 major components. It is a proportioned engineering concept, not fabrication CAD, and does not establish structural, electrical, drinking-water or grid compliance.
+The browser model at `/model.html` depicts a rooftop concept with a solar and rain-catching canopy, a raised horizontal-axis screw-profile wind-turbine concept on a braced mast, shared battery/inverter/control hardware, and a separate rain treatment loop. The illustrated wind design is inspired by the linked Archimedean screw-style rotor reference; neither its output claims nor rooftop suitability have been validated for WELOS. The model is visual concept geometry, not fabrication CAD, and does not establish structural, electrical, drinking-water or grid compliance.
 
 ## Product boundary
 
 ```text
-PV canopy ── DC isolator/SPD ── MPPT ───────┐
-                                             ├── protected 48 V bus ── battery/BMS
-VAWT ── brake ── rectifier/dump load ───────┘             │
+PV canopy ── DC isolator/SPD ── solar MPPT ──┐
+                                              ├── protected 48 V bus ── battery/BMS
+Raised yawing screw-profile rotor ── generator ── brake ── wind rectifier/dump load ─┘  │
                                                            └── hybrid inverter ── critical loads/grid
 
-rain gutter ── first flush ── filters ── UV ── tank ── pump ── approved non-potable loads
+canopy gutter ── first flush ── sediment/carbon/UV treatment ── ~100 L reference tank ── pump ── approved non-potable loads
                        sensors/actuators ── isolated field I/O ── WELOS OS
 ```
 
@@ -20,7 +20,7 @@ rain gutter ── first flush ── filters ── UV ── tank ── pump 
 
 The edge controller samples isolated sensors, applies the deterministic modes in `docs/WELOS_CONTROL_SYSTEM.md`, commands contactors/valves/pumps within hardware limits, records events and exposes the authenticated local API described in `docs/DEVICE_API.md`.
 
-The OS may optimize battery dispatch, cleaning, pump schedules and water routing. It must never replace inverter anti-islanding, branch protection, battery BMS limits, mechanical wind braking, emergency stop, RCD/RCBO protection, tank overflow, backflow prevention or any other required hardwired protection.
+The OS may optimize battery dispatch, cleaning, pump schedules and water routing. It must never replace inverter anti-islanding, branch protection, battery BMS limits, mechanical wind braking, emergency stop, RCD/RCBO protection, tank overflow, backflow prevention or any other required hardwired protection. Rooftop wind needs resource measurement and structural, vibration, acoustic and safety review before product claims or installation.
 
 ## Prototype interfaces
 

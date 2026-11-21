@@ -20,9 +20,9 @@ Open the local URL shown by Vite. The product tools are separate entry points:
 ## Product foundation
 
 - Solar photovoltaic canopy with integrated rain catchment
-- Compact vertical-axis wind module with independent braking
-- First-flush, filtration, UV, tank, pumping and water-quality instrumentation
-- 48 V LiFePO4 storage, MPPT, wind rectification and hybrid inverter
+- Video-inspired raised horizontal-axis screw-profile wind turbine concept, with yaw, generator, brake and roof anchors
+- First-flush, filtration, UV, configurable ~100 L reference tank, pumping and water-quality instrumentation
+- Separate solar MPPT and wind rectifier feeding one protected 48 V LiFePO4 battery/DC bus and hybrid inverter
 - ESP32-S3 edge controller, local API, authenticated commands and offline operation
 - Deterministic safety-oriented control modes and fault handling
 

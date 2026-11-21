@@ -5,15 +5,15 @@ import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.j
 
 // Dimensions are visual proportions for an integrated rooftop concept, not fabrication CAD.
 const C = {
-  shell: 0xdbe3dd, frame: 0x687d79, dark: 0x172622, black: 0x101a1b,
+  shell: 0xdbe3dd, frame: 0x687d79, dark: 0x172622, black: 0x101a1b, rotor: 0x2475d2,
   glass: 0x143b52, cell: 0x1b5574, solar: 0xf7ba4e, water: 0x48bdd1,
   wind: 0x94d7dd, energy: 0xf38c5c, green: 0x42be92, safety: 0xe76250,
 };
 const VIEWS = {
-  overview: { eye: [9.5, 6.8, 11.5], look: [0, 0.65, 0] },
+  overview: { eye: [10.5, 8.2, 13.5], look: [0, 0.7, 0] },
   controller: { eye: [3.7, 1.9, 6.2], look: [-0.05, -0.75, 1.65] },
   solar: { eye: [3.4, 6.7, 7.4], look: [-1.05, 1.65, -0.45] },
-  wind: { eye: [7.6, 5.6, 5.6], look: [3.2, 2.05, -0.75] },
+  wind: { eye: [7.8, 5.5, 6.6], look: [3.15, 3.2, -0.9] },
   water: { eye: [-5.6, 1.25, 5.2], look: [-2.4, -0.68, 1.25] },
   storage: { eye: [5.6, 1.6, 5.7], look: [1.45, -0.72, 1.5] },
 };
@@ -51,6 +51,12 @@ function pipe(parent, points, radius, color, opacity = 1) {
   parent.add(mesh);
   return mesh;
 }
+function flowMarker(parent, points, color, phase = 0) {
+  const path = new THREE.CatmullRomCurve3(points.map((point) => new THREE.Vector3(...point)));
+  const marker = new THREE.Mesh(new THREE.SphereGeometry(0.06, 12, 12), new THREE.MeshBasicMaterial({ color, toneMapped: false }));
+  parent.add(marker);
+  return (time) => marker.position.copy(path.getPoint((time * 0.00008 + phase) % 1));
+}
 function register(parent, registry, id, object, at, separated = [0, 0, 0]) {
   object.position.set(...at);
   object.userData.partId = id;
@@ -68,6 +74,11 @@ function register(parent, registry, id, object, at, separated = [0, 0, 0]) {
 function addPlatform(root) {
   place(root, block([8.9, 0.24, 6.2], 0x53645f, 0.12, 0.65), 0, -2.07, 0);
   place(root, block([8.6, 0.07, 5.9], 0x273b37, 0.04, 0.4), 0, -1.91, 0);
+  // A parapet makes the roof installation context visible in the model.
+  place(root, block([8.68, 0.32, 0.16], 0x879891, 0.035, 0.55), 0, -1.78, -2.92);
+  place(root, block([8.68, 0.32, 0.16], 0x879891, 0.035, 0.55), 0, -1.78, 2.92);
+  place(root, block([0.16, 0.32, 5.7], 0x879891, 0.035, 0.55), -4.28, -1.78, 0);
+  place(root, block([0.16, 0.32, 5.7], 0x879891, 0.035, 0.55), 4.28, -1.78, 0);
   [-3.75, 3.75].forEach((x) => [-2.3, 2.3].forEach((z) => {
     place(root, block([0.52, 0.2, 0.52], 0x879891, 0.04, 0.7), x, -2.28, z);
     place(root, cyl(0.085, 0.045, C.black, 0.8, 16), x, -2.16, z);
@@ -135,70 +146,113 @@ function addSolar(root, registry) {
   solarCable.name = "solar-cable";
 }
 
-function helixBlade(phase) {
+function screwFlight() {
+  const turns = 2.15;
+  const stations = 72;
+  const radialSteps = 12;
   const vertices = [];
   const indices = [];
-  const bands = 24;
-  for (let i = 0; i <= bands; i += 1) {
-    const t = i / bands;
-    const theta = phase + t * 0.78;
-    const center = new THREE.Vector3(Math.cos(theta) * 0.7, -1.08 + t * 2.16, Math.sin(theta) * 0.7);
-    const tangent = new THREE.Vector3(-Math.sin(theta), 0, Math.cos(theta));
-    for (const edge of [-1, 1]) {
-      const p = center.clone().addScaledVector(tangent, edge * 0.22);
-      vertices.push(p.x, p.y, p.z);
-    }
-    if (i < bands) {
-      const n = i * 2;
-      indices.push(n, n + 1, n + 2, n + 1, n + 3, n + 2);
+  for (let i = 0; i <= stations; i += 1) {
+    const t = i / stations;
+    const theta = t * turns * Math.PI * 2;
+    const outerRadius = 0.2 + 0.57 * t;
+    for (let j = 0; j <= radialSteps; j += 1) {
+      const radial = j / radialSteps;
+      const radius = 0.13 + (outerRadius - 0.13) * radial;
+      const x = -0.86 + t * 1.72;
+      vertices.push(x, Math.cos(theta) * radius, Math.sin(theta) * radius);
+      if (i < stations && j < radialSteps) {
+        const a = i * (radialSteps + 1) + j;
+        const b = a + radialSteps + 1;
+        indices.push(a, a + 1, b, a + 1, b + 1, b);
+      }
     }
   }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-  geo.setIndex(indices);
-  geo.computeVertexNormals();
-  return new THREE.Mesh(geo, mat(C.shell, 0.56, 0.3, { side: THREE.DoubleSide }));
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return new THREE.Mesh(geometry, mat(C.rotor, 0.34, 0.28, { side: THREE.DoubleSide }));
 }
 
 function addWind(root, registry) {
-  const support = new THREE.Group();
-  beam(support, [0, -2.05, 0], [0, 0.33, 0], 0.13, C.frame, 0.8);
-  place(support, cyl(0.4, 0.12, 0x7f9692, 0.68), 0, -2.04, 0);
-  place(support, cyl(0.1, 2.25, 0x8b9d98, 0.7), 0, 1.44, 0);
-  support.position.set(3.25, 0, -0.9);
-  root.add(support);
-
-  const generator = new THREE.Group();
-  place(generator, cyl(0.45, 0.5, C.black, 0.65), 0, 0, 0);
-  for (let i = 0; i < 16; i += 1) {
-    const fin = block([0.08, 0.32, 0.03], C.frame, 0.008, 0.55);
-    fin.rotation.y = i * Math.PI / 8;
-    place(generator, fin, Math.cos(i * Math.PI / 8) * 0.44, 0, Math.sin(i * Math.PI / 8) * 0.44);
+  const x = 3.22;
+  const z = -0.88;
+  const mast = new THREE.Group();
+  const bottom = -1.88;
+  const top = 3.18;
+  for (const dx of [-0.27, 0.27]) for (const dz of [-0.27, 0.27]) {
+    beam(mast, [dx, bottom, dz], [dx * 0.76, top, dz * 0.76], 0.045, C.frame, 0.78);
+    place(mast, block([0.19, 0.13, 0.19], C.black, 0.018, 0.7), dx, bottom + 0.02, dz);
   }
-  register(root, registry, "wind-generator", generator, [3.25, 0.5, -0.9], [0.9, 0, -0.2]);
-  const brake = new THREE.Group();
-  place(brake, cyl(0.47, 0.13, C.safety, 0.65), 0, 0, 0);
-  place(brake, block([0.28, 0.2, 0.26], C.dark, 0.02, 0.6), 0.47, 0, 0);
-  register(root, registry, "wind-brake", brake, [3.25, 0.86, -0.9], [0.8, 0.18, -0.1]);
+  for (const y of [-0.5, 0.85, 2.15]) {
+    const half = y < 0 ? 0.27 : 0.22;
+    beam(mast, [-half, y, -half], [half, y, -half], 0.025, 0x9cac9f);
+    beam(mast, [-half, y, half], [half, y, half], 0.025, 0x9cac9f);
+    beam(mast, [-half, y, -half], [-half, y, half], 0.025, 0x9cac9f);
+    beam(mast, [half, y, -half], [half, y, half], 0.025, 0x9cac9f);
+  }
+  for (const y of [-0.5, 0.85, 2.15]) {
+    const half = y < 0 ? 0.27 : 0.22;
+    beam(mast, [-half, y - 0.67, -half], [half, y + 0.67, -half], 0.022, 0x9cac9f);
+    beam(mast, [half, y - 0.67, half], [-half, y + 0.67, half], 0.022, 0x9cac9f);
+  }
+  register(root, registry, "wind-mast", mast, [x, 0, z], [0.5, 0, 0]);
+
+  const head = new THREE.Group();
+  place(head, cyl(0.36, 0.16, 0x879891, 0.75), 0, -0.08, 0);
+  place(head, block([0.34, 0.2, 0.3], C.dark, 0.035, 0.6), 0.32, -0.22, 0.22);
+  place(head, block([0.16, 0.1, 0.14], C.solar, 0.015, 0.4), 0.32, -0.21, 0.3);
+  register(root, registry, "wind-yaw", head, [x, top, z], [0, 0.2, 0]);
 
   const rotor = new THREE.Group();
-  place(rotor, cyl(0.085, 2.42, C.frame, 0.8, 20), 0, 0, 0);
-  for (let i = 0; i < 3; i += 1) rotor.add(helixBlade(i * Math.PI * 2 / 3));
-  for (const y of [-1.05, 1.05]) {
-    place(rotor, cyl(0.74, 0.055, C.frame, 0.75), 0, y, 0);
-  }
+  const shaft = cyl(0.1, 2.05, C.frame, 0.82, 24);
+  shaft.rotation.z = Math.PI / 2;
+  place(rotor, shaft, 0, 0, 0);
+  rotor.add(screwFlight());
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.28, 32), mat(C.rotor, 0.34, 0.28));
+  nose.rotation.z = -Math.PI / 2;
+  place(rotor, nose, -0.98, 0, 0);
   rotor.name = "wind-rotor";
-  register(root, registry, "vawt-rotor", rotor, [3.25, 2.25, -0.9], [0.65, 0.55, -0.2]);
-  pipe(root, [[3.25, 0.3, -0.9], [3.25, -0.65, -0.9], [2.2, -0.65, -0.9], [2.2, 0.05, 1.44]], 0.025, C.wind);
+  register(head, registry, "wind-rotor", rotor, [-0.02, 0.04, 0], [-0.1, 0.62, 0]);
+
+  const generator = new THREE.Group();
+  const generatorBody = cyl(0.3, 0.62, C.black, 0.72, 28);
+  generatorBody.rotation.z = Math.PI / 2;
+  place(generator, generatorBody, 0, 0, 0);
+  for (let i = 0; i < 9; i += 1) place(generator, block([0.026, 0.48, 0.46], C.frame, 0.01, 0.6), -0.25 + i * 0.062, 0, 0);
+  register(head, registry, "wind-generator", generator, [0.98, 0.04, 0], [0.35, 0.15, 0.1]);
+
+  const brake = new THREE.Group();
+  const disc = cyl(0.22, 0.06, C.safety, 0.65, 28);
+  disc.rotation.z = Math.PI / 2;
+  place(brake, disc, 0, 0, 0);
+  place(brake, block([0.24, 0.16, 0.16], C.dark, 0.018, 0.62), 0.18, 0.02, 0.19);
+  register(head, registry, "wind-brake", brake, [0.62, 0.04, 0.05], [0.3, 0.26, 0.12]);
+
+  const vane = new THREE.Group();
+  beam(vane, [0, 0, 0], [0.86, 0, 0], 0.035, C.frame, 0.6);
+  const finShape = new THREE.Shape();
+  finShape.moveTo(0, 0);
+  finShape.lineTo(0.65, 0.18);
+  finShape.lineTo(1.12, 0);
+  finShape.lineTo(0.65, -0.18);
+  finShape.closePath();
+  const fin = new THREE.Mesh(new THREE.ShapeGeometry(finShape), mat(C.shell, 0.48, 0.36, { side: THREE.DoubleSide }));
+  fin.position.set(0.78, 0.14, 0);
+  vane.add(fin);
+  register(head, registry, "wind-vane", vane, [1.12, 0.04, 0], [0.65, 0.35, 0]);
+  pipe(root, [[4.2, 3.2, -0.9], [3.7, 3.15, -0.88], [3.22, 2.8, -0.88], [3.22, -1.82, -0.88], [2.2, -1.82, -0.65], [2.2, 0.05, 1.44]], 0.027, C.wind);
 }
 
 function addWater(root, registry) {
   const tank = new THREE.Group();
-  place(tank, cyl(0.67, 1.55, 0x357983, 0.22), 0, 0, 0);
-  place(tank, cyl(0.69, 0.13, 0x4aa7b1, 0.4), 0, 0.79, 0);
-  place(tank, cyl(0.17, 0.13, C.dark, 0.4), 0, 0.9, 0);
-  for (const y of [-0.52, 0.5]) place(tank, new THREE.Mesh(new THREE.TorusGeometry(0.675, 0.024, 8, 40), mat(0xa7cac8, 0.64)), 0, y, 0).rotation.x = Math.PI / 2;
-  register(root, registry, "water-tank", tank, [-2.8, -1.03, 1.0], [-0.6, 0, 0.4]);
+  // Visual reference volume: pi * r^2 * h is approximately 0.10 m3 (100 L).
+  place(tank, cyl(0.26, 0.47, 0x357983, 0.22), 0, 0, 0);
+  place(tank, cyl(0.28, 0.07, 0x4aa7b1, 0.4), 0, 0.24, 0);
+  place(tank, cyl(0.075, 0.08, C.dark, 0.4), 0, 0.31, 0);
+  for (const y of [-0.15, 0.16]) place(tank, new THREE.Mesh(new THREE.TorusGeometry(0.26, 0.017, 8, 40), mat(0xa7cac8, 0.64)), 0, y, 0).rotation.x = Math.PI / 2;
+  register(root, registry, "water-tank", tank, [-3.12, -1.62, 1.12], [-0.45, 0, 0.35]);
 
   const flush = new THREE.Group();
   place(flush, cyl(0.17, 0.93, C.water, 0.32), 0, 0, 0);
@@ -227,9 +281,9 @@ function addWater(root, registry) {
   register(root, registry, "water-sensors", sensors, [-2.45, -0.18, 1.75], [-0.18, 0.38, 0.42]);
 
   pipe(root, [[-3.95, 1.35, 1.56], [-3.95, -0.5, 1.55], [-3.94, -0.9, 1.0]], 0.052, C.water);
-  pipe(root, [[-3.94, -1.62, 1.0], [-3.5, -1.62, 1.0], [-3.5, -0.95, 1.0]], 0.046, C.water);
-  pipe(root, [[-2.1, -1.0, 1.0], [-1.7, -1.0, 1.4], [-1.7, -0.55, 1.9]], 0.04, C.water);
-  pipe(root, [[-1.3, -1.5, 1.9], [-1.55, -1.55, 1.9]], 0.038, C.water);
+  pipe(root, [[-3.94, -1.62, 1.0], [-3.35, -1.62, 1.25], [-2.2, -1.25, 1.65], [-1.52, -1.08, 1.9]], 0.046, C.water);
+  pipe(root, [[-1.08, -1.48, 1.9], [-1.2, -1.62, 1.7], [-2.35, -1.62, 1.35], [-3.12, -1.62, 1.12]], 0.04, C.water);
+  pipe(root, [[-2.92, -1.62, 1.2], [-2.2, -1.68, 1.45], [-1.55, -1.6, 1.75]], 0.038, C.water);
   pipe(root, [[-1.55, -1.62, 1.75], [-3.75, -1.62, 1.75], [-3.75, 1.42, 1.62], [-3.75, 1.78, -1.85]], 0.023, C.water);
 }
 
@@ -343,7 +397,7 @@ export function createWelosScene(container, { onSelect, onReady, onError, module
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.6;
-  renderer.domElement.setAttribute("aria-label", "Interactive 3D WELOS rooftop appliance with configurable solar, wind, water and hydro add-ons");
+  renderer.domElement.setAttribute("aria-label", "Interactive WELOS rooftop concept with solar canopy, raised horizontal-axis screw-profile wind turbine, shared battery and inverter, and rainwater filtration");
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
@@ -383,6 +437,11 @@ export function createWelosScene(container, { onSelect, onReady, onError, module
     assemblies[name] = group;
   }
   assemblies.hydro = addHydro(root);
+  const signalPaths = [
+    flowMarker(root, [[-3.75, 1.5, -0.3], [-3.75, 0.45, -0.3], [0.4, 0.45, -0.3], [1.3, 0.08, 1.45]], C.solar, 0.08),
+    flowMarker(root, [[4.15, 3.18, -0.88], [3.22, 2.65, -0.88], [3.22, -1.82, -0.88], [2.2, -1.82, -0.65], [2.2, 0.05, 1.44]], C.wind, 0.45),
+    flowMarker(root, [[-3.95, 1.25, 1.55], [-3.95, -0.4, 1.4], [-3.94, -1.3, 1.0], [-3.35, -1.55, 1.25], [-2.2, -1.25, 1.65], [-1.52, -1.08, 1.9], [-1.2, -1.62, 1.7], [-2.35, -1.62, 1.35], [-3.12, -1.62, 1.12]], C.water, 0.68),
+  ];
   function setModules(next) {
     const selection = { solar: true, wind: true, water: true, hydro: false, ...next };
     assemblies.solar.visible = selection.solar || selection.water;
@@ -491,8 +550,12 @@ export function createWelosScene(container, { onSelect, onReady, onError, module
       object.position.lerp(object.userData.destination, reduced ? 1 : 1 - Math.pow(0.86, dt * 60));
     });
     if (!reduced) {
-      if (assemblies.wind.visible) registry.get("vawt-rotor").rotation.y += dt * 0.32;
+      if (assemblies.wind.visible) {
+        registry.get("wind-rotor").rotation.x += dt * 0.48;
+        registry.get("wind-yaw").rotation.y = Math.sin(now * 0.00016) * 0.055;
+      }
     }
+    signalPaths.forEach((updateSignal) => updateSignal(reduced ? 0 : now));
     controls.update();
     renderer.render(scene, camera);
   }

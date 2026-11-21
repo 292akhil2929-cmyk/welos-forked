@@ -7,7 +7,7 @@ import "../page-brand.css";
 
 const ADDONS = [
   { id: "solar", name: "Solar canopy", description: "PV array, MPPT and performance sensing", symbol: "☀", color: "#F0A50E" },
-  { id: "wind", name: "Wind turbine", description: "Vertical-axis rotor and rectifier", symbol: "↝", color: "#F0A50E" },
+  { id: "wind", name: "Wind turbine", description: "Raised screw-profile rotor concept, yaw, rectifier and brake; site assessment required", symbol: "↝", color: "#F0A50E" },
   { id: "water", name: "Rain recovery", description: "Gutter, filtration and storage", symbol: "◈", color: "#F0A50E" },
   { id: "hydro", name: "Micro-hydro", description: "Flow-powered generation module", symbol: "≈", color: "#F0A50E" },
 ];

@@ -23,12 +23,14 @@
       ]
     },
     {
-      "id": "urban-wind",
+      "id": "raised-horizontal-axis-wind-concept",
       "items": [
-        { "ref": "W01", "item": "Helical vertical-axis rotor and mast", "qty": 1, "selection": "Fatigue, vibration and acoustic validation required" },
-        { "ref": "W02", "item": "Permanent-magnet generator", "qty": 1, "selection": "Matched torque-speed curve" },
-        { "ref": "W03", "item": "Fail-safe brake and overspeed switch", "qty": 1, "selection": "Independent shutdown path" },
-        { "ref": "W04", "item": "Anemometer and vibration sensor", "qty": 1, "selection": "Outdoor-rated; redundant overspeed sensing preferred" }
+        { "ref": "W01", "item": "Horizontal-axis helical screw-profile rotor", "qty": 1, "selection": "Video-inspired reference geometry only; independent power-curve, fatigue, acoustic and overspeed testing required" },
+        { "ref": "W02", "item": "Permanent-magnet generator", "qty": 1, "selection": "Matched to a measured rotor torque-speed curve" },
+        { "ref": "W03", "item": "Yaw bearing, direction sensor and head drive", "qty": 1, "selection": "Design and validate safe alignment, fault state and wind operating limits" },
+        { "ref": "W04", "item": "Mechanical brake and independent overspeed shutdown", "qty": 1, "selection": "Engineered fail-safe shutdown independent of cloud control" },
+        { "ref": "W05", "item": "Raised braced mast and roof anchors", "qty": 1, "selection": "Site-specific structural review for roof loads, fatigue, vibration, noise and approvals" },
+        { "ref": "W06", "item": "Wind-direction and vibration instrumentation", "qty": 1, "selection": "Measure resource and operating behavior at the proposed rotor location" }
       ]
     },
     {
@@ -36,7 +38,7 @@
       "items": [
         { "ref": "R01", "item": "First-flush diverter with drain valve", "qty": 1, "selection": "Volume sized to catchment and dust loading" },
         { "ref": "R02", "item": "Sediment, activated-carbon and UV train", "qty": 1, "selection": "Micron stages and UV dose determined by water testing and maximum flow" },
-        { "ref": "R03", "item": "Opaque storage tank with screened vent, overflow and drain", "qty": 1, "selection": "Capacity and material per intended use" },
+        { "ref": "R03", "item": "Opaque storage tank with screened vent, overflow and drain", "qty": 1, "selection": "About 100 L reference concept; size per catchment yield, demand, roof capacity and intended use" },
         { "ref": "R04", "item": "Variable-speed pump, accumulator and check valve", "qty": 1, "selection": "Duty point based on final hydraulic design" },
         { "ref": "R05", "item": "Level, flow, pressure, turbidity, conductivity and leak sensors", "qty": 1, "selection": "Calibrated, serviceable sensor set" },
         { "ref": "R06", "item": "Motorized isolation/bypass valves", "qty": 3, "selection": "Fail-safe position defined by hazard analysis" },

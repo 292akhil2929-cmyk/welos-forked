@@ -86,8 +86,8 @@ function ModelApp() {
         <aside className="system-rail" aria-label="Model systems">
           <div className="rail-intro">
             <span className="eyebrow">Inside the machine</span>
-            <h1>One machine.<br />Five systems.</h1>
-            <p>A compact rooftop appliance: one canopy, one chassis and connected energy and water systems.</p>
+            <h1>One roof.<br />Five systems.</h1>
+            <p>A rooftop energy-and-water concept: solar canopy, raised screw-profile wind rotor, shared battery and inverter, and a separate rain-treatment path.</p>
           </div>
           <nav className="system-list">
             {systems.map((system, index) => (
@@ -100,7 +100,7 @@ function ModelApp() {
           </nav>
           <div className="concept-note">
             <span>Model status</span>
-            <p>Concept architecture for demonstration. Final electrical, structural and safety design requires licensed engineering validation.</p>
+            <p>Concept model, not fabrication CAD. Electrical, water-quality, structural and safety designs require engineering validation.</p>
           </div>
         </aside>
 
