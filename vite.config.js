@@ -12,6 +12,7 @@ export default defineConfig({
         model: resolve(__dirname, "model.html"),
         configure: resolve(__dirname, "configure.html"),
         explore: resolve(__dirname, "explore.html"),
+        pricing: resolve(__dirname, "pricing.html"),
       },
     },
   },

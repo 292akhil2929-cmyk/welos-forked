@@ -19,6 +19,7 @@ const destinations = [
   { number: "01", name: "3D model", description: "Orbit the assembled machine and inspect its hardware and software layers.", href: "/model.html", action: "Open model" },
   { number: "02", name: "Exploded view", description: "See the machine separate and rebuild in the dedicated engineering exhibit.", href: "/explore.html", action: "Explore components" },
   { number: "03", name: "Configure a site", description: "Enter a location or your own requirements to preview a tailored system.", href: "/configure.html", action: "Start configuring" },
+  { number: "04", name: "Price your system", description: "Compare solar sizes, add site-suited wind and rain modules, and estimate the customer price.", href: "/pricing.html", action: "Build a price" },
 ];
 
 function Brand({ label = "WELOS home" }) {

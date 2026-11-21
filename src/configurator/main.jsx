@@ -109,7 +109,7 @@ function App() {
   }
 
   return <div className="configure-app">
-    <header className="configure-header"><a className="page-brand" href="/" aria-label="WELOS home"><img src="/welos-brand-transparent.png" alt="" /><span><strong>WELOS</strong><small>URBAN RESOURCE SYSTEM</small></span></a><div className="page-header-title">SITE CONFIGURATOR</div><a className="page-back" href="/">← &nbsp; OVERVIEW</a></header>
+    <header className="configure-header"><a className="page-brand" href="/" aria-label="WELOS home"><img src="/welos-brand-transparent.png" alt="" /><span><strong>WELOS</strong><small>URBAN RESOURCE SYSTEM</small></span></a><a className="page-header-title" href="/pricing.html">PRICE YOUR SYSTEM ↗</a><a className="page-back" href="/">← &nbsp; OVERVIEW</a></header>
     <main className="configure-main">
       <section className="intro"><div className="eyebrow"><i /> CONFIGURATION STUDIO / 01</div><h1>Built for <em>your</em> site.</h1><p>Start with your location for a climate-informed concept, or shape the machine yourself. Every add-on you select appears on the 3D preview.</p></section>
       <div className="workspace">
